@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace FW.Common
 {
@@ -47,7 +48,7 @@ namespace FW.Common
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public bool SendMsg(string msg)
+        public bool SendMsg<T>(T data,string queueName, string routingKeyName, string exchangeName = Common.ExchangeName)
         {
             try
             {
@@ -55,18 +56,18 @@ namespace FW.Common
                 {
                     using (var channel = conn.CreateModel())
                     {
-                        channel.QueueDeclare(queue: Common.QueueNamePre,
+                        channel.QueueDeclare(queue: queueName,
                                      durable: true,
                                      exclusive: false,
                                      autoDelete: false,
                                      arguments: default);
-                        channel.ExchangeDeclare(Common.ExchangeName, ExchangeType.Direct, true);
-                        channel.QueueBind(Common.QueueNamePre, Common.ExchangeName, Common.RoutingKeyName);
+                        channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
+                        channel.QueueBind(queueName, exchangeName, routingKeyName);
 
-                        var body = Encoding.UTF8.GetBytes(msg);
+                        var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
 
-                        channel.BasicPublish(exchange: Common.ExchangeName,
-                                             routingKey: Common.RoutingKeyName,
+                        channel.BasicPublish(exchange: exchangeName,
+                                             routingKey: routingKeyName,
                                              basicProperties: default,
                                              body: body);
 
@@ -92,7 +93,7 @@ namespace FW.Common
 
         private EventingBasicConsumer consumer;
 
-        public bool StartReceiveMsg()
+        public bool StartReceiveMsg(string queueName, string routingKeyName, string exchangeName = Common.ExchangeName)
         {
             try
             {
@@ -100,7 +101,7 @@ namespace FW.Common
 
                 channel = conn.CreateModel();
 
-                channel.QueueDeclare(queue: Common.QueueNamePre,
+                channel.QueueDeclare(queue: queueName,
                                 durable: true,
                                 exclusive: false,
                                 autoDelete: false,
@@ -109,19 +110,21 @@ namespace FW.Common
                 channel.BasicQos(0, 1, false);//公平分发、同一时间只处理一个消息。
 
                 consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (model, ea) =>
-                {
-                    var body = ea.Body.ToArray();
-                    var message = Encoding.UTF8.GetString(body);
-                    //Console.WriteLine(" [x] Received {0}", message);
-                    //if (OnReceiveEvent != null)
-                    //{
-                    //    OnReceiveEvent(message);
-                    //}
-                };
-                channel.BasicConsume(queue: Common.QueueNamePre,
-                                        autoAck: true,
+                channel.BasicConsume(queue: queueName,
+                                        autoAck: false,
                                         consumer: consumer);
+                consumer.Received += (sender, e) =>
+                {
+                    var body = e.Body;
+                    string message = Encoding.UTF8.GetString(body.ToArray());
+
+                    Console.WriteLine(message);
+                    //Thread.Sleep(1000);
+                    //回复确认
+                    channel.BasicAck(e.DeliveryTag, false);
+                };
+                //进行消费
+                channel.BasicConsume(queueName, false, consumer);
                 return true;
             }
             catch (Exception ex)
@@ -141,7 +144,7 @@ namespace FW.Common
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public bool SendMsg(string msg)
+        public bool SendMsg<T>(T data, string queueName, string routingKeyName, string exchangeName = Common.ExchangeName)
         {
             try
             {
@@ -149,13 +152,19 @@ namespace FW.Common
                 {
                     using (var channel = conn.CreateModel())
                     {
-                        channel.ExchangeDeclare(exchange: "amq.fanout", type: ExchangeType.Fanout, durable: true);
+                        channel.QueueDeclare(queue: queueName,
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: default);
+                        channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Fanout, durable: true);
+                        channel.QueueBind(queueName, exchangeName, routingKeyName);
 
-                        var body = Encoding.UTF8.GetBytes(msg);
+                        var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
 
-                        channel.BasicPublish(exchange: "amq.fanout",
-                                             routingKey: "",
-                                             basicProperties: null,
+                        channel.BasicPublish(exchange: exchangeName,
+                                             routingKey: routingKeyName,
+                                             basicProperties: default,
                                              body: body);
 
                         //Console.WriteLine(" [x] Sent {0}", message);
@@ -194,6 +203,98 @@ namespace FW.Common
                 //此处随机取出交换机下的队列
                 //var queueName = channel.QueueDeclare().QueueName;
                 channel.QueueBind(queue: queueName, exchange: "amq.fanout", routingKey: "");
+                consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (model, ea) =>
+                {
+                    var body = ea.Body.ToArray();
+                    var message = Encoding.UTF8.GetString(body);
+                    //Console.WriteLine(" [x] Received {0}", message);
+                    //if (OnReceiveEvent != null)
+                    //{
+                    //    OnReceiveEvent(queueName + "::" + message);
+                    //}
+                };
+                channel.BasicConsume(queue: queueName,
+                                        autoAck: true,
+                                        consumer: consumer);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    /// <summary>
+    /// fanout类型交换机，发送消息
+    /// </summary>
+    public class RabbitMqTopicSendHelper : RabbitMqHelper
+    {
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public bool SendMsg<T>(T data, string queueName, string routingKeyName, string exchangeName = Common.ExchangeName)
+        {
+            try
+            {
+                using (var conn = GetConnection())
+                {
+                    using (var channel = conn.CreateModel())
+                    {
+                        channel.QueueDeclare(queue: queueName,
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: default);
+                        channel.ExchangeDeclare(exchange: queueName, type: ExchangeType.Topic, durable: true);
+                        channel.QueueBind(queueName, exchangeName, routingKeyName);
+
+                        var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
+
+                        channel.BasicPublish(exchange: exchangeName,
+                                             routingKey: routingKeyName,
+                                             basicProperties: default,
+                                             body: body);
+
+                        //Console.WriteLine(" [x] Sent {0}", message);
+                    };
+                };
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+
+    /// <summary>
+    /// fanout类型交换机接收消息
+    /// </summary>
+    public class RabbitMqTopicReceiveHelper : RabbitMqHelper
+    {
+        //public RabbitMqReceiveEventHandler OnReceiveEvent;
+
+        private IConnection conn;
+
+        private IModel channel;
+
+        private EventingBasicConsumer consumer;
+
+        public bool StartReceiveMsg(string queueName, string routingKeyName, string exchangeName = Common.ExchangeName)
+        {
+            try
+            {
+                conn = GetConnection();
+
+                channel = conn.CreateModel();
+                channel.ExchangeDeclare(exchange: queueName, type: ExchangeType.Topic, durable: true);
+                //此处随机取出交换机下的队列
+                //var queueName = channel.QueueDeclare().QueueName;
+                channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKeyName);
                 consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (model, ea) =>
                 {
