@@ -1,0 +1,8 @@
+E:\Project\ijlynivfhp\FW.Console\bin\Debug\FW.Console.exe.config
+E:\Project\ijlynivfhp\FW.Console\bin\Debug\FW.Console.exe
+E:\Project\ijlynivfhp\FW.Console\bin\Debug\FW.Console.pdb
+E:\Project\ijlynivfhp\FW.Console\obj\Debug\FW.Console.csproj.AssemblyReference.cache
+E:\Project\ijlynivfhp\FW.Console\obj\Debug\FW.Console.csproj.SuggestedBindingRedirects.cache
+E:\Project\ijlynivfhp\FW.Console\obj\Debug\FW.Console.csproj.CoreCompileInputs.cache
+E:\Project\ijlynivfhp\FW.Console\obj\Debug\FW.Console.exe
+E:\Project\ijlynivfhp\FW.Console\obj\Debug\FW.Console.pdb
