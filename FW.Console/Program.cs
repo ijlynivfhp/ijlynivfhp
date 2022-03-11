@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FW.Common;
+using RabbitMQ.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +12,15 @@ namespace FW.Console
     {
         static void Main(string[] args)
         {
+            var error = string.Empty;
+            new RabbitMqFMTwoHelper(new RabbitMqConfigModel());
+            //RabbitMqFMTwoHelper.Send("000000000000", ref error);
+            Func<string, bool> func = new Func<string, bool>(Say);
+            RabbitMqFMTwoHelper.Receive<string>(func);
         }
-    }
+        static bool Say(string msg) {
+            System.Console.WriteLine(msg);
+            return true;
+        }
+	}
 }

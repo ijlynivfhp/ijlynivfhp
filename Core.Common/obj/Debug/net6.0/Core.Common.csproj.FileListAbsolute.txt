@@ -1,0 +1,12 @@
+E:\Project\ijlynivfhp\Core.Common\bin\Debug\net6.0\Core.Common.deps.json
+E:\Project\ijlynivfhp\Core.Common\bin\Debug\net6.0\Core.Common.dll
+E:\Project\ijlynivfhp\Core.Common\bin\Debug\net6.0\Core.Common.pdb
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\Core.Common.csproj.AssemblyReference.cache
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\Core.Common.GeneratedMSBuildEditorConfig.editorconfig
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\Core.Common.AssemblyInfoInputs.cache
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\Core.Common.AssemblyInfo.cs
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\Core.Common.csproj.CoreCompileInputs.cache
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\Core.Common.dll
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\refint\Core.Common.dll
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\Core.Common.pdb
+E:\Project\ijlynivfhp\Core.Common\obj\Debug\net6.0\ref\Core.Common.dll
