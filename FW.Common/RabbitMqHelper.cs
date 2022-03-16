@@ -250,7 +250,7 @@ namespace FW.Common
                                      autoDelete: false,
                                      arguments: default);
                         channel.ExchangeDeclare(exchange: queueName, type: ExchangeType.Topic, durable: true);
-                        channel.QueueBind(queueName, exchangeName, routingKeyName);
+                        channel.QueueBind(queueName, exchangeName, "");
 
                         var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
 
@@ -319,13 +319,13 @@ namespace FW.Common
     }
 
     public class Common {
-        public const string VirtualHost = "/";
+        public const string VirtualHost = "VirtualHost";
         public const string HostName = "127.0.0.1";
         public const int Port = 5672;
         public const string UserName = "sa";
         public const string Password = "123456";
-        public const string ExchangeName = "DataSenderExchange";
-        public const string QueueNamePre = "DataSender";
-        public const string RoutingKeyName = "DataSenderRoutingKey";
+        public const string ExchangeName = "ExchangeName";
+        public const string QueueNamePre = "QueueNamePre";
+        public const string RoutingKeyName = "RoutingKeyName";
     }
 }
