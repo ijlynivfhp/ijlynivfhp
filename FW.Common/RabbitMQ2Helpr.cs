@@ -214,5 +214,75 @@ namespace FW.Common
                 Console.WriteLine(ex.Message);
             }
         }
+
+
+        /// <summary>
+        /// 开始消费
+        /// </summary>
+        public void ConsumerExtra()
+        {
+            try
+            {
+
+                ConnectionFactory factory = new ConnectionFactory();
+                factory.UserName = userName;
+                factory.Password = password;
+                factory.HostName = hostName;
+                factory.Port = port;
+                factory.VirtualHost = virtualHost;
+
+                //factory.AutomaticRecoveryEnabled = true;
+                using (var connection = factory.CreateConnection())
+                {
+
+                    using (var channel = connection.CreateModel())
+                    {
+                        //设置交换器的类型
+                        channel.ExchangeDeclare(exchangeName, exchangeType);
+
+                        //声明一个队列，设置队列是否持久化，排他性，与自动删除
+                        channel.QueueDeclare(queueName, false, false, false, null);
+
+                        //绑定消息队列，交换器，routingkey
+                        channel.QueueBind(queueName, exchangeName, routingKey, null);
+
+                        //流量控制
+                        channel.BasicQos(0, 2, false);
+
+                        while (true)
+                        {
+                            //消费数据
+                            var consumer = new EventingBasicConsumer(channel);
+
+                            //false为手动应答，true为自动应答
+                            channel.BasicConsume(queueName, false, consumer);
+
+                            consumer.Received += (ch, ea) =>
+                            {
+                                var body = ea.Body.ToArray();
+
+                                MQMsg(Encoding.UTF8.GetString(body));
+
+                                //Console.WriteLine("已接收： {0}", Encoding.UTF8.GetString(body));
+
+                                //手动应答时使用
+                                channel.BasicAck(ea.DeliveryTag, false);
+                            };
+
+                            string consumerTag = channel.BasicConsume(queueName, false, consumer);
+                            channel.BasicCancel(consumerTag);
+
+                            Thread.Sleep(1);
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MQError(ex.Message);
+                Console.WriteLine(ex.Message);
+            }
+        }
     }
 }
