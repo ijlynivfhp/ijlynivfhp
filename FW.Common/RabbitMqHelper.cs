@@ -16,7 +16,7 @@ namespace FW.Common
         /// 创建连接
         /// </summary>
         /// <returns></returns>
-        public IConnection GetConnection()
+        public static IConnection GetConnection()
         {
             try
             {
@@ -28,6 +28,7 @@ namespace FW.Common
                     Password = Common.Password,
                     VirtualHost = Common.VirtualHost
                 };
+                factory.AutomaticRecoveryEnabled = true;
                 var conn = factory.CreateConnection();
                 return conn;
             }
@@ -231,42 +232,61 @@ namespace FW.Common
     /// </summary>
     public class RabbitMqTopicSendHelper : RabbitMqHelper
     {
+        private static IConnection _conn;
+
+        public static IConnection conn
+        {
+            get
+            {
+                if(_conn is null||!_conn.IsOpen )
+                    _conn= GetConnection();
+                return _conn;
+            }
+            set
+            {
+                _conn = value;
+            }
+        }
+
+        public RabbitMqTopicSendHelper()
+        {
+            if (!conn.IsOpen) conn = GetConnection();
+        }
         /// <summary>
         /// 发送消息
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public bool SendMsg<T>(T data, string queueName, string routingKeyName, string exchangeName = Common.ExchangeName)
+        public static bool SendMsg<T>(T data, string queueName, string routingKeyName, string exchangeName = Common.ExchangeName)
         {
             try
             {
-                using (var conn = GetConnection())
+                if (!conn.IsOpen) conn = GetConnection();
+                using (var channel = conn.CreateModel())
                 {
-                    using (var channel = conn.CreateModel())
-                    {
-                        channel.QueueDeclare(queue: queueName,
-                                     durable: true,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: default);
-                        channel.ExchangeDeclare(exchange: queueName, type: ExchangeType.Topic, durable: true);
-                        channel.QueueBind(queueName, exchangeName, "");
+                    channel.QueueDeclare(queue: queueName,
+                                 durable: true,
+                                 exclusive: false,
+                                 autoDelete: false,
+                                 arguments: default);
+                    channel.ExchangeDeclare(exchange: queueName, type: ExchangeType.Topic, durable: true);
+                    channel.QueueBind(queueName, exchangeName, "");
 
-                        var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
+                    var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
 
-                        channel.BasicPublish(exchange: exchangeName,
-                                             routingKey: routingKeyName,
-                                             basicProperties: default,
-                                             body: body);
+                    channel.BasicPublish(exchange: exchangeName,
+                                         routingKey: routingKeyName,
+                                         basicProperties: default,
+                                         body: body);
 
-                        //Console.WriteLine(" [x] Sent {0}", message);
-                    };
+                    //Console.WriteLine(" [x] Sent {0}", message);
                 };
                 return true;
             }
             catch (Exception ex)
             {
-                throw ex;
+                Console.WriteLine(ex.Message);
+                return false;
             }
         }
     }
@@ -319,7 +339,7 @@ namespace FW.Common
     }
 
     public class Common {
-        public const string VirtualHost = "VirtualHost";
+        public const string VirtualHost = "DataSenderVir";
         public const string HostName = "127.0.0.1";
         public const int Port = 5672;
         public const string UserName = "sa";
