@@ -26,3 +26,5 @@ E:\Project\ijlynivfhp\FWProducer2\obj\Debug\FWProducer2.csproj.CoreCompileInputs
 E:\Project\ijlynivfhp\FWProducer2\obj\Debug\FWProducer2.csproj.CopyComplete
 E:\Project\ijlynivfhp\FWProducer2\obj\Debug\FWProducer2.exe
 E:\Project\ijlynivfhp\FWProducer2\obj\Debug\FWProducer2.pdb
+E:\Project\ijlynivfhp\FWProducer2\bin\Debug\M2Mqtt.Net.dll
+E:\Project\ijlynivfhp\FWProducer2\bin\Debug\M2Mqtt.Net.pdb

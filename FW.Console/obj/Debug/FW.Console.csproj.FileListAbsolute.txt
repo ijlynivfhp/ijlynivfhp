@@ -26,3 +26,5 @@ E:\Project\ijlynivfhp\FW.Console\bin\Debug\System.Threading.Tasks.Extensions.xml
 E:\Project\ijlynivfhp\FW.Console\obj\Debug\FW.Console.csproj.CopyComplete
 E:\Project\ijlynivfhp\FW.Console\bin\Debug\Newtonsoft.Json.dll
 E:\Project\ijlynivfhp\FW.Console\bin\Debug\Newtonsoft.Json.xml
+E:\Project\ijlynivfhp\FW.Console\bin\Debug\M2Mqtt.Net.dll
+E:\Project\ijlynivfhp\FW.Console\bin\Debug\M2Mqtt.Net.pdb
