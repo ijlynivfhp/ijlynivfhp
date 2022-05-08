@@ -121,6 +121,7 @@
     <Compile Include="RabbitMQ2Helpr.cs" />
     <Compile Include="RabbitMqHelper.cs" />
     <Compile Include="RabbitMQTTHelper.cs" />
+    <Compile Include="TestA.cs" />
     <Compile Include="TestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
