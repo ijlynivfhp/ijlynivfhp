@@ -237,14 +237,6 @@ namespace FW.Common
 
                     using (var channel = connection.CreateModel())
                     {
-                        //设置交换器的类型
-                        channel.ExchangeDeclare(exchangeName, exchangeType);
-
-                        //声明一个队列，设置队列是否持久化，排他性，与自动删除
-                        channel.QueueDeclare(queueName, false, false, false, null);
-
-                        //绑定消息队列，交换器，routingkey
-                        channel.QueueBind(queueName, exchangeName, routingKey, null);
 
                         //流量控制
                         channel.BasicQos(0, 2, false);
