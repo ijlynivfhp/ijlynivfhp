@@ -41,7 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Example.cs" />
+    <Compile Include="DynamicClassHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="T_DataDetailExtInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
